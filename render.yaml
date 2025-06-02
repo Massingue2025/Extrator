@@ -1,5 +1,6 @@
 services:
   - type: web
     name: extrator
-    env: docker
-    plan: free
+    env: python
+    buildCommand: ""
+    startCommand: "python app.py"
