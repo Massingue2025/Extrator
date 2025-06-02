@@ -2,5 +2,5 @@ services:
   - type: web
     name: extrator
     env: python
-    buildCommand: ""
+    buildCommand: "./install_tesseract.sh"
     startCommand: "python app.py"
