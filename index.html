@@ -1,52 +1,25 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html>
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Aumentar Qualidade da Imagem com FFmpeg</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 20px;
-      max-width: 600px;
-    }
-    label, select, input, button {
-      display: block;
-      margin-top: 10px;
-      font-size: 1rem;
-    }
-    img {
-      max-width: 100%;
-      margin-top: 20px;
-      border: 1px solid #ccc;
-      padding: 5px;
-    }
-  </style>
+    <title>Melhorar Imagem com IA</title>
 </head>
 <body>
-  <h1>Aumentar Qualidade da Imagem</h1>
-  <form method="POST" enctype="multipart/form-data">
-    <label for="image">Selecione a imagem:</label>
-    <input type="file" id="image" name="image" accept="image/*" required />
+    <h1>Melhorar Qualidade da Imagem</h1>
+    <form method="POST" enctype="multipart/form-data">
+        <label>Imagem:</label>
+        <input type="file" name="image" required><br><br>
+        <label>Multiplicador de Qualidade:</label>
+        <select name="scale">
+            <option value="2">2x</option>
+            <option value="4">4x</option>
+        </select><br><br>
+        <input type="submit" value="Melhorar">
+    </form>
 
-    <label for="quality">Selecione a qualidade (altura em pixels):</label>
-    <select id="quality" name="quality" required>
-      <option value="140">140p</option>
-      <option value="240">240p</option>
-      <option value="360">360p</option>
-      <option value="480">480p</option>
-      <option value="720" selected>720p</option>
-      <option value="1080">1080p</option>
-      <option value="1440">1440p</option>
-      <option value="2160">4K (2160p)</option>
-    </select>
-
-    <button type="submit">Aumentar Qualidade</button>
-  </form>
-
-  {% if enhanced_image %}
-    <h2>Imagem aprimorada:</h2>
-    <img src="{{ url_for('enhanced_file', filename=enhanced_image) }}" alt="Imagem aprimorada" />
-  {% endif %}
+    {% if enhanced_image %}
+        <h2>Resultado:</h2>
+        <img src="{{ url_for('static', filename='enhanced/' + enhanced_image) }}" width="400"><br>
+        <a href="{{ url_for('static', filename='enhanced/' + enhanced_image) }}" download>Download</a>
+    {% endif %}
 </body>
 </html>
