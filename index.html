@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <title>Melhorar Imagem com FFMPEG</title>
+</head>
+<body>
+  <h2>Upload de Imagem para Melhorar Qualidade (Resolução)</h2>
+  <form method="POST" enctype="multipart/form-data">
+    <label>Escolha uma imagem:</label>
+    <input type="file" name="image" accept="image/*" required><br><br>
+
+    <label>Escolha a resolução desejada:</label>
+    <select name="quality" required>
+      <option value="140p">140p (256x144)</option>
+      <option value="240p">240p (426x240)</option>
+      <option value="360p">360p (640x360)</option>
+      <option value="480p">480p (854x480)</option>
+      <option value="720p">720p HD (1280x720)</option>
+      <option value="1080p">1080p Full HD (1920x1080)</option>
+      <option value="2k">2K (2560x1440)</option>
+      <option value="4k">4K Ultra HD (3840x2160)</option>
+    </select><br><br>
+
+    <button type="submit">Enviar e Melhorar</button>
+  </form>
+
+  {% if enhanced_image %}
+    <h3>Imagem Melhorada:</h3>
+    <img src="/static/outputs/{{ enhanced_image }}" style="max-width: 100%; height: auto;">
+  {% endif %}
+</body>
+</html>
