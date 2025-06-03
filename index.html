@@ -1,33 +1,52 @@
 <!DOCTYPE html>
-<html lang="pt">
+<html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <title>Melhorar Imagem com FFMPEG</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Aumentar Qualidade da Imagem com FFmpeg</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+      max-width: 600px;
+    }
+    label, select, input, button {
+      display: block;
+      margin-top: 10px;
+      font-size: 1rem;
+    }
+    img {
+      max-width: 100%;
+      margin-top: 20px;
+      border: 1px solid #ccc;
+      padding: 5px;
+    }
+  </style>
 </head>
 <body>
-  <h2>Upload de Imagem para Melhorar Qualidade (Resolução)</h2>
+  <h1>Aumentar Qualidade da Imagem</h1>
   <form method="POST" enctype="multipart/form-data">
-    <label>Escolha uma imagem:</label>
-    <input type="file" name="image" accept="image/*" required><br><br>
+    <label for="image">Selecione a imagem:</label>
+    <input type="file" id="image" name="image" accept="image/*" required />
 
-    <label>Escolha a resolução desejada:</label>
-    <select name="quality" required>
-      <option value="140p">140p (256x144)</option>
-      <option value="240p">240p (426x240)</option>
-      <option value="360p">360p (640x360)</option>
-      <option value="480p">480p (854x480)</option>
-      <option value="720p">720p HD (1280x720)</option>
-      <option value="1080p">1080p Full HD (1920x1080)</option>
-      <option value="2k">2K (2560x1440)</option>
-      <option value="4k">4K Ultra HD (3840x2160)</option>
-    </select><br><br>
+    <label for="quality">Selecione a qualidade (altura em pixels):</label>
+    <select id="quality" name="quality" required>
+      <option value="140">140p</option>
+      <option value="240">240p</option>
+      <option value="360">360p</option>
+      <option value="480">480p</option>
+      <option value="720" selected>720p</option>
+      <option value="1080">1080p</option>
+      <option value="1440">1440p</option>
+      <option value="2160">4K (2160p)</option>
+    </select>
 
-    <button type="submit">Enviar e Melhorar</button>
+    <button type="submit">Aumentar Qualidade</button>
   </form>
 
   {% if enhanced_image %}
-    <h3>Imagem Melhorada:</h3>
-    <img src="/static/outputs/{{ enhanced_image }}" style="max-width: 100%; height: auto;">
+    <h2>Imagem aprimorada:</h2>
+    <img src="{{ url_for('enhanced_file', filename=enhanced_image) }}" alt="Imagem aprimorada" />
   {% endif %}
 </body>
 </html>
