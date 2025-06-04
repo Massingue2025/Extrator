@@ -32,8 +32,8 @@ def index():
             file.save(filepath)
 
             img = Image.open(filepath).convert('RGB')
-
             model_path = baixar_modelo(scale)
+
             model = RealESRGAN(torch.device('cpu'), scale=scale)
             model.load_weights(model_path)
 
@@ -50,4 +50,4 @@ def index():
     return render_template_string(html_content, enhanced_image=enhanced_image)
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=81)
+    app.run(host='0.0.0.0', port=10000)
