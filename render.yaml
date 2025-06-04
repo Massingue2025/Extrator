@@ -1,8 +1,7 @@
 services:
   - type: web
-    name: wppconnect-server
-    env: node
-    buildCommand: npm install
-    startCommand: node index.js
+    name: wppconnect-app
+    env: python
+    buildCommand: ""
+    startCommand: ./start.sh
     plan: free
-
