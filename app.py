@@ -1,53 +1,51 @@
-from flask import Flask, request, render_template_string, send_from_directory
-import os
+from flask import Flask, request, send_file
+from io import BytesIO
 from PIL import Image
-from realesrgan import RealESRGAN
-import torch
-import requests
+import os
+import subprocess
 
 app = Flask(__name__)
-UPLOAD_FOLDER = 'static/enhanced'
-os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
-def baixar_modelo(scale):
-    model_path = f'RealESRGAN_x{scale}.pth'
-    if not os.path.exists(model_path):
-        url = f'https://github.com/xinntao/Real-ESRGAN/releases/download/v0.2.5/RealESRGAN_x{scale}plus.pth'
-        r = requests.get(url)
-        with open(model_path, 'wb') as f:
-            f.write(r.content)
-    return model_path
+@app.route('/', methods=['POST'])
+def enhance_image():
+    if 'image' not in request.files:
+        return "Imagem não enviada", 400
 
-@app.route('/', methods=['GET', 'POST'])
-def index():
-    enhanced_image = None
+    image_file = request.files['image']
+    scale = request.form.get('scale', '2')
+    scale = scale if scale in ['2', '4'] else '2'
 
-    if request.method == 'POST':
-        file = request.files['image']
-        scale = int(request.form.get('scale', 2))
+    input_path = 'input.png'
+    output_path = 'output.png'
 
-        if file:
-            filename = file.filename
-            filepath = os.path.join(UPLOAD_FOLDER, filename)
-            file.save(filepath)
+    # Salva imagem temporária
+    image = Image.open(image_file)
+    image.save(input_path)
 
-            img = Image.open(filepath).convert('RGB')
-            model_path = baixar_modelo(scale)
+    # Executa Real-ESRGAN com o modelo real
+    command = [
+        './realesrgan-ncnn-vulkan',
+        '-i', input_path,
+        '-o', output_path,
+        '-s', scale
+    ]
 
-            model = RealESRGAN(torch.device('cpu'), scale=scale)
-            model.load_weights(model_path)
+    result = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    if result.returncode != 0:
+        return f"Erro ao melhorar a imagem: {result.stderr.decode()}", 500
 
-            enhanced = model.predict(img)
-            enhanced_filename = f'enhanced_{filename}'
-            enhanced_path = os.path.join(UPLOAD_FOLDER, enhanced_filename)
-            enhanced.save(enhanced_path)
+    with open(output_path, 'rb') as f:
+        img_bytes = BytesIO(f.read())
 
-            enhanced_image = enhanced_filename
+    # Limpa arquivos temporários
+    os.remove(input_path)
+    os.remove(output_path)
 
-    with open('index.html', 'r', encoding='utf-8') as f:
-        html_content = f.read()
+    return send_file(img_bytes, mimetype='image/png')
 
-    return render_template_string(html_content, enhanced_image=enhanced_image)
+@app.route('/', methods=['GET'])
+def home():
+    return "Servidor de melhoria de imagem com IA. Envie via POST com 'image' e 'scale'."
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=10000)
+    app.run(host='0.0.0.0', port=8080)
