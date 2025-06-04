@@ -1,21 +1,35 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>WppConnect - Envio de Mensagens</title>
+  <title>Enviar WhatsApp</title>
+  <meta charset="utf-8">
   <style>
-    body { font-family: Arial; padding: 20px; text-align: center; }
-    input, textarea { width: 300px; margin: 10px; padding: 8px; }
+    body { font-family: Arial; text-align: center; padding: 20px; }
+    input, textarea { width: 300px; padding: 10px; margin: 10px; }
+    button { padding: 10px 20px; }
   </style>
 </head>
 <body>
-  <h1>Conectar com WhatsApp</h1>
-  <img src="https://wppconnect.io/qr" alt="QR Code do WhatsApp" width="300" />
-
-  <h2>Enviar Mensagem</h2>
-  <form method="post" action="/send">
-    <input type="text" name="number" placeholder="Número (ex: 25884xxxxxxx)" required><br>
-    <textarea name="message" rows="5" placeholder="Sua mensagem" required></textarea><br>
+  <h1>WppConnect</h1>
+  <form id="form">
+    <input type="text" id="number" placeholder="Número com DDI (ex: 25884xxxxxxx)" required><br>
+    <textarea id="message" placeholder="Digite a mensagem" required></textarea><br>
     <button type="submit">Enviar</button>
   </form>
+  <div id="response"></div>
+  <script>
+    document.getElementById("form").addEventListener("submit", async function(e) {
+      e.preventDefault();
+      const number = document.getElementById("number").value;
+      const message = document.getElementById("message").value;
+      const res = await fetch("/send", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ number, message })
+      });
+      const data = await res.json();
+      document.getElementById("response").innerText = data.status || data.error;
+    });
+  </script>
 </body>
 </html>
