@@ -1,5 +1,2 @@
 flask
 pillow
-realesrgan
-torch
-
