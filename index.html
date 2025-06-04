@@ -1,25 +1,40 @@
 <!DOCTYPE html>
-<html>
+<html lang="pt-BR">
 <head>
-    <title>Melhorar Imagem com IA</title>
+  <meta charset="UTF-8" />
+  <title>WhatsApp com WppConnect</title>
+  <style>
+    body { font-family: Arial; text-align: center; background: #f5f5f5; padding: 20px; }
+    input, textarea { width: 300px; margin: 10px; padding: 10px; }
+    button { padding: 10px 20px; background: #25d366; color: white; border: none; cursor: pointer; }
+    #status { margin-top: 20px; font-weight: bold; }
+  </style>
 </head>
 <body>
-    <h1>Melhorar Qualidade da Imagem</h1>
-    <form method="POST" enctype="multipart/form-data">
-        <label>Imagem:</label>
-        <input type="file" name="image" required><br><br>
-        <label>Multiplicador de Qualidade:</label>
-        <select name="scale">
-            <option value="2">2x</option>
-            <option value="4">4x</option>
-        </select><br><br>
-        <input type="submit" value="Melhorar">
-    </form>
+  <h2>WppConnect - Envio de Mensagem</h2>
+  <img src="qr.png" alt="QR Code" width="250"><br>
+  <input id="number" placeholder="Número com DDI ex: 25884XXXXXXX"><br>
+  <textarea id="message" placeholder="Digite a mensagem..."></textarea><br>
+  <button onclick="send()">Enviar</button>
+  <p id="status"></p>
 
-    {% if enhanced_image %}
-        <h2>Resultado:</h2>
-        <img src="{{ url_for('static', filename='enhanced/' + enhanced_image) }}" width="400"><br>
-        <a href="{{ url_for('static', filename='enhanced/' + enhanced_image) }}" download>Download</a>
-    {% endif %}
+  <script>
+    async function send() {
+      const number = document.getElementById('number').value;
+      const message = document.getElementById('message').value;
+      const status = document.getElementById('status');
+
+      if (!number || !message) return status.innerText = 'Preencha todos os campos!';
+
+      const res = await fetch('/send-message', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ number, message })
+      });
+
+      const data = await res.json();
+      status.innerText = data.status || data.error;
+    }
+  </script>
 </body>
 </html>
