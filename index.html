@@ -1,34 +1,44 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt">
 <head>
-  <meta charset="UTF-8" />
-  <title>WhatsApp com WppConnect</title>
+  <meta charset="UTF-8">
+  <title>WppConnect - WhatsApp Sender</title>
   <style>
-    body { font-family: Arial; text-align: center; background: #f5f5f5; padding: 20px; }
-    input, textarea { width: 300px; margin: 10px; padding: 10px; }
-    button { padding: 10px 20px; background: #25d366; color: white; border: none; cursor: pointer; }
-    #status { margin-top: 20px; font-weight: bold; }
+    body { font-family: Arial, sans-serif; text-align: center; background: #f4f4f4; padding: 40px; }
+    input, textarea { padding: 10px; margin: 10px; width: 300px; border: 1px solid #ccc; }
+    button { background: #25D366; color: #fff; border: none; padding: 10px 20px; cursor: pointer; }
+    img { margin: 20px 0; }
+    #status { margin-top: 20px; color: green; }
   </style>
 </head>
 <body>
-  <h2>WppConnect - Envio de Mensagem</h2>
-  <img src="qr.png" alt="QR Code" width="250"><br>
-  <input id="number" placeholder="Número com DDI ex: 25884XXXXXXX"><br>
-  <textarea id="message" placeholder="Digite a mensagem..."></textarea><br>
-  <button onclick="send()">Enviar</button>
-  <p id="status"></p>
+  <h1>Envio WhatsApp - WppConnect</h1>
+  <p>Escaneie o QR code com seu WhatsApp:</p>
+  <img src="qr.png" alt="QR Code" width="250">
+
+  <div>
+    <input id="number" placeholder="Número com DDI (ex: 25884xxxxxxx)"><br>
+    <textarea id="message" placeholder="Digite sua mensagem..."></textarea><br>
+    <button onclick="send()">Enviar Mensagem</button>
+    <div id="status"></div>
+  </div>
 
   <script>
     async function send() {
-      const number = document.getElementById('number').value;
-      const message = document.getElementById('message').value;
+      const number = document.getElementById('number').value.trim();
+      const message = document.getElementById('message').value.trim();
       const status = document.getElementById('status');
 
-      if (!number || !message) return status.innerText = 'Preencha todos os campos!';
+      if (!number || !message) {
+        status.innerText = 'Preencha número e mensagem.';
+        return;
+      }
+
+      status.innerText = 'Enviando...';
 
       const res = await fetch('/send-message', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({ number, message })
       });
 
