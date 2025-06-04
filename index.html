@@ -1,50 +1,21 @@
 <!DOCTYPE html>
-<html lang="pt">
+<html>
 <head>
-  <meta charset="UTF-8">
-  <title>WppConnect - WhatsApp Sender</title>
+  <title>WppConnect - Envio de Mensagens</title>
   <style>
-    body { font-family: Arial, sans-serif; text-align: center; background: #f4f4f4; padding: 40px; }
-    input, textarea { padding: 10px; margin: 10px; width: 300px; border: 1px solid #ccc; }
-    button { background: #25D366; color: #fff; border: none; padding: 10px 20px; cursor: pointer; }
-    img { margin: 20px 0; }
-    #status { margin-top: 20px; color: green; }
+    body { font-family: Arial; padding: 20px; text-align: center; }
+    input, textarea { width: 300px; margin: 10px; padding: 8px; }
   </style>
 </head>
 <body>
-  <h1>Envio WhatsApp - WppConnect</h1>
-  <p>Escaneie o QR code com seu WhatsApp:</p>
-  <img src="qr.png" alt="QR Code" width="250">
+  <h1>Conectar com WhatsApp</h1>
+  <img src="https://wppconnect.io/qr" alt="QR Code do WhatsApp" width="300" />
 
-  <div>
-    <input id="number" placeholder="Número com DDI (ex: 25884xxxxxxx)"><br>
-    <textarea id="message" placeholder="Digite sua mensagem..."></textarea><br>
-    <button onclick="send()">Enviar Mensagem</button>
-    <div id="status"></div>
-  </div>
-
-  <script>
-    async function send() {
-      const number = document.getElementById('number').value.trim();
-      const message = document.getElementById('message').value.trim();
-      const status = document.getElementById('status');
-
-      if (!number || !message) {
-        status.innerText = 'Preencha número e mensagem.';
-        return;
-      }
-
-      status.innerText = 'Enviando...';
-
-      const res = await fetch('/send-message', {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({ number, message })
-      });
-
-      const data = await res.json();
-      status.innerText = data.status || data.error;
-    }
-  </script>
+  <h2>Enviar Mensagem</h2>
+  <form method="post" action="/send">
+    <input type="text" name="number" placeholder="Número (ex: 25884xxxxxxx)" required><br>
+    <textarea name="message" rows="5" placeholder="Sua mensagem" required></textarea><br>
+    <button type="submit">Enviar</button>
+  </form>
 </body>
 </html>
