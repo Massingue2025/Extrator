@@ -1,13 +1,12 @@
 {
-  "name": "wppconnect-app",
+  "name": "facebook-live-streamer",
   "version": "1.0.0",
+  "description": "Live para o Facebook usando vídeo remoto via ffmpeg",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"
   },
   "dependencies": {
-    "@wppconnect-team/wppconnect": "^2.32.7",
-    "express": "^4.18.2",
-    "cors": "^2.8.5"
+    "dotenv": "^16.0.3"
   }
 }
