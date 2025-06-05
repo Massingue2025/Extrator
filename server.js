@@ -1,61 +1,42 @@
-const express = require("express");
-const multer = require("multer");
 const { spawn } = require("child_process");
-const fs = require("fs");
 require("dotenv").config();
 
-const app = express();
-const upload = multer({ storage: multer.memoryStorage() });
+const FB_STREAM_KEY = process.env.FB_STREAM_KEY;
+const VIDEO_URL = process.env.VIDEO_URL;
+const DURATION_MINUTES = parseInt(process.env.LIVE_DURATION_MINUTES || "30", 10);
 
-app.use(express.static("public"));
+if (!FB_STREAM_KEY || !VIDEO_URL) {
+  console.error("Erro: .env incompleto");
+  process.exit(1);
+}
 
-app.post("/upload", upload.single("video"), async (req, res) => {
-  const durationMin = parseInt(req.body.duration);
-  if (!req.file || !durationMin || durationMin <= 0) {
-    return res.status(400).send("Dados inválidos.");
+const streamUrl = `rtmps://live-api-s.facebook.com:443/rtmp/${FB_STREAM_KEY}`;
+const totalSeconds = DURATION_MINUTES * 60;
+
+console.log(`🔴 Iniciando transmissão ao vivo por ${DURATION_MINUTES} minutos...`);
+
+const ffmpegProcess = spawn("ffmpeg", [
+  "-re",
+  "-stream_loop", "-1",
+  "-i", VIDEO_URL,
+  "-c:v", "libx264",
+  "-preset", "veryfast",
+  "-maxrate", "3000k",
+  "-bufsize", "6000k",
+  "-pix_fmt", "yuv420p",
+  "-g", "50",
+  "-c:a", "aac",
+  "-b:a", "128k",
+  "-f", "flv",
+  streamUrl
+], { stdio: "inherit" });
+
+const startTime = Date.now();
+const interval = setInterval(() => {
+  const elapsed = (Date.now() - startTime) / 1000;
+  if (elapsed >= totalSeconds) {
+    console.log("⏹️ Tempo de live esgotado. Encerrando...");
+    ffmpegProcess.kill("SIGINT");
+    clearInterval(interval);
   }
-
-  const streamUrl = `rtmps://live-api-s.facebook.com:443/rtmp/${process.env.FB_STREAM_KEY}`;
-  const totalSeconds = durationMin * 60;
-  const tempPath = `/tmp/uploaded_${Date.now()}.mp4`;
-
-  fs.writeFileSync(tempPath, req.file.buffer);
-
-  const repeatStream = () => {
-    return spawn("ffmpeg", [
-      "-re",
-      "-stream_loop", "-1",
-      "-i", tempPath,
-      "-c:v", "libx264",
-      "-preset", "veryfast",
-      "-maxrate", "3000k",
-      "-bufsize", "6000k",
-      "-pix_fmt", "yuv420p",
-      "-g", "50",
-      "-c:a", "aac",
-      "-b:a", "128k",
-      "-f", "flv",
-      streamUrl
-    ], { stdio: "inherit" });
-  };
-
-  const startTime = Date.now();
-  const process = repeatStream();
-
-  const interval = setInterval(() => {
-    const elapsed = (Date.now() - startTime) / 1000;
-    if (elapsed >= totalSeconds) {
-      process.kill("SIGINT");
-      clearInterval(interval);
-      fs.unlinkSync(tempPath);
-      console.log("Live finalizada.");
-    }
-  }, 5000);
-
-  res.send("Live iniciada com sucesso no Facebook!");
-});
-
-const PORT = process.env.PORT || 10000;
-app.listen(PORT, () => {
-  console.log(`Servidor rodando na porta ${PORT}`);
-});
+}, 5000);
