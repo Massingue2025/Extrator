@@ -1,32 +1,61 @@
-const express = require('express');
-const cors = require('cors');
-const { create } = require('@wppconnect-team/wppconnect');
+const express = require("express");
+const multer = require("multer");
+const { spawn } = require("child_process");
+const fs = require("fs");
+require("dotenv").config();
 
 const app = express();
-app.use(cors());
-app.use(express.urlencoded({ extended: true }));
-app.use(express.json());
-app.use(express.static('.')); // serve index.html
+const upload = multer({ storage: multer.memoryStorage() });
 
-let client;
+app.use(express.static("public"));
 
-create()
-  .then((wpp) => {
-    client = wpp;
-    console.log("✅ Cliente WhatsApp conectado.");
-  })
-  .catch((error) => console.error("Erro ao iniciar o cliente:", error));
-
-app.post('/send', async (req, res) => {
-  const { number, message } = req.body;
-  try {
-    await client.sendText(number + '@c.us', message);
-    res.json({ status: 'Mensagem enviada com sucesso' });
-  } catch (err) {
-    res.status(500).json({ error: 'Erro ao enviar mensagem' });
+app.post("/upload", upload.single("video"), async (req, res) => {
+  const durationMin = parseInt(req.body.duration);
+  if (!req.file || !durationMin || durationMin <= 0) {
+    return res.status(400).send("Dados inválidos.");
   }
+
+  const streamUrl = `rtmps://live-api-s.facebook.com:443/rtmp/${process.env.FB_STREAM_KEY}`;
+  const totalSeconds = durationMin * 60;
+  const tempPath = `/tmp/uploaded_${Date.now()}.mp4`;
+
+  fs.writeFileSync(tempPath, req.file.buffer);
+
+  const repeatStream = () => {
+    return spawn("ffmpeg", [
+      "-re",
+      "-stream_loop", "-1",
+      "-i", tempPath,
+      "-c:v", "libx264",
+      "-preset", "veryfast",
+      "-maxrate", "3000k",
+      "-bufsize", "6000k",
+      "-pix_fmt", "yuv420p",
+      "-g", "50",
+      "-c:a", "aac",
+      "-b:a", "128k",
+      "-f", "flv",
+      streamUrl
+    ], { stdio: "inherit" });
+  };
+
+  const startTime = Date.now();
+  const process = repeatStream();
+
+  const interval = setInterval(() => {
+    const elapsed = (Date.now() - startTime) / 1000;
+    if (elapsed >= totalSeconds) {
+      process.kill("SIGINT");
+      clearInterval(interval);
+      fs.unlinkSync(tempPath);
+      console.log("Live finalizada.");
+    }
+  }, 5000);
+
+  res.send("Live iniciada com sucesso no Facebook!");
 });
 
-app.listen(3000, () => {
-  console.log('🚀 Servidor rodando na porta 3000');
+const PORT = process.env.PORT || 10000;
+app.listen(PORT, () => {
+  console.log(`Servidor rodando na porta ${PORT}`);
 });
